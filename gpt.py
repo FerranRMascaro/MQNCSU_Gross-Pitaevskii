@@ -1,120 +1,120 @@
 import math
 
 # Constants
-n1 = 1000
-xr = [0.0] * (n1 + 1)
-frev = [0.0] * (n1 + 1)
-freo = [0.0] * (n1 + 1)
-fred = [0.0] * (n1 + 1)
-xmu = [0.0] * (n1 + 1)
-fren = [0.0] * (n1 + 1)
-den = [0.0] * (n1 + 1)
-u = [0.0] * (n1 + 1)
+num_points = 1000
+x = [0.0] * (num_points + 1)
+real = [0.0] * (num_points + 1)
+imag = [0.0] * (num_points + 1)
+d2r = [0.0] * (num_points + 1)
+mu = [0.0] * (num_points + 1)
+new_real = [0.0] * (num_points + 1)
+density = [0.0] * (num_points + 1)
+potential = [0.0] * (num_points + 1)
 
 # Input values
-a0, n1, step, aa, time, alpha, iter = map(float, input("Enter input values: ").split())
+a0, num_points, step_size, aa, time_step, alpha, iterations = map(float, input("Enter input values: ").split())
 
 # Constants
 pi = math.pi
-piin = 1.0 / (4.0 * pi)
-pi2in = math.sqrt(piin)
-alpha2 = alpha * alpha
-cvar = 2.0 * math.sqrt(alpha) ** 3 / math.sqrt(math.sqrt(pi))
+pi_inv = 1.0 / (4.0 * pi)
+sqrt_pi_inv = math.sqrt(pi_inv)
+alpha_squared = alpha * alpha
+c = 2.0 * math.sqrt(alpha) ** 3 / math.sqrt(math.sqrt(pi))
 
 # Building the starting wave function R(r). Phi(r) = R(r)/r * Y00
-for i in range(1, n1 + 1):
-    xr[i] = step * (i - 1)
-    xr2 = xr[i] * xr[i]
-    frev[i] = cvar * xr[i] * math.exp(-0.5 * alpha2 * xr2)
-    freo[i] = frev[i]
+for i in range(1, num_points + 1):
+    x[i] = step_size * (i - 1)
+    x_squared = x[i] * x[i]
+    real[i] = c * x[i] * math.exp(-0.5 * alpha_squared * x_squared)
+    imag[i] = real[i]
 
 # Starting the convergence process
 # To reduce to the harmonic oscillator, set cequ=0
 cequ = a0 * aa
-as3n = aa * a0 * a0 * a0
-cequ = 0.0  # Uncomment this line to recover the harmonic oscillator
+a_s3n = aa * a0 * a0 * a0
+# Uncomment this line to recover the harmonic oscillator
+# cequ = 0.0
 
 itw = 0
-for it in range(1, iter + 1):
+for it in range(1, iterations + 1):
     itw += 1
     xnorm = 0.0
     ene0 = 0.0
 
     # Calculation of the second derivative using finite difference method
-    for i in range(2, n1):
-        fred[i] = (freo[i-1] + freo[i+1] - 2.0 * freo[i]) / (step * step)
+    for i in range(2, num_points):
+        d2r[i] = (imag[i-1] + imag[i+1] - 2.0 * imag[i]) / (step_size * step_size)
 
-    fred[n1] = (freo[n1-1] - 2.0 * freo[n1]) / (step * step)
+    d2r[num_points] = (imag[num_points-1] - 2.0 * imag[num_points]) / (step_size * step_size)
 
-    for i in range(1, n1 + 1):
-        xr2 = xr[i] * xr[i]
+    for i in range(1, num_points + 1):
+        x_squared = x[i] * x[i]
         if i == 1:
-            xmu[i] = 0.0
+            mu[i] = 0.0
         else:
             # Calculation of energies and xmu
-            ene0 = ene0 - freo[i] * fred[i] * 0.5 + 0.5 * xr2 * freo[i] * freo[i] + 0.5 * cequ * xr2 * (freo[i] / xr[i]) ** 4
-            xmu[i] = -0.5 * fred[i] / freo[i] + 0.5 * xr2 + cequ * (freo[i] / xr[i]) ** 2
+            ene0 = ene0 - imag[i] * d2r[i] * 0.5 + 0.5 * x_squared * imag[i] * imag[i] + 0.5 * cequ * x_squared * (imag[i] / x[i]) ** 4
+            mu[i] = -0.5 * d2r[i] / imag[i] + 0.5 * x_squared + cequ * (imag[i] / x[i]) ** 2
 
         # Update the wave function
-        fren[i] = freo[i] - time * xmu[i] * freo[i]
-        xnorm += fren[i] * fren[i]
+        new_real[i] = imag[i] - time_step * mu[i] * imag[i]
+        xnorm += new_real[i] * new_real[i]
 
-    xnorm = math.sqrt(xnorm * step)
-    ene0 = ene0 * step
+    xnorm = math.sqrt(xnorm * step_size)
+    ene0 = ene0 * step_size
 
     if itw == 200:
         print('ene0')
 
 # Update the wave function normalization
-for i in range(1, n1 + 1):
-    freo[i] = fren[i] / xnorm
+for i in range(1, num_points + 1):
+    imag[i] = new_real[i] / xnorm
 
-if it == iter:
+if it == iterations:
     with open('output.txt', 'w') as f:
-        for i in range(1, n1 + 1):
-            f.write(f"{xr[i]:15.5e} {xmu[i]:15.5e}\n")
+        for i in range(1, num_points + 1):
+            f.write(f"{x[i]:15.5e} {mu[i]:15.5e}\n")
 
 # Calculation of radius, potential, kinetic energy, density, and single-particle potential
-radious = 0.0
-xkin = 0.0
-poth0 = 0.0
-potself = 0.0
-chem = 0.0
-xaver = 0.0
-xnormden = 0.0
+radius = 0.0
+kinetic_energy = 0.0
+potential_harmonic = 0.0
+potential_self = 0.0
+chemical_potential = 0.0
+average_x = 0.0
+density_norm = 0.0
 
-for i in range(2, n1 + 1):
-    xr2 = xr[i] * xr[i]
-    radious += xr2 * freo[i] * freo[i]
-    xkin += freo[i] * fred[i]
-    poth0 += xr2 * freo[i] * freo[i]
-    potself += xr2 * (freo[i] / xr[i]) ** 4
-    chem += xmu[i] * freo[i] * freo[i]
-    u[i] = 0.5 * xr2 + cequ * (freo[i] / xr[i]) ** 2
-    den[i] = (freo[i] / xr[i]) ** 2
-    xnormden += den[i] * xr2
-    xaver += freo[i] * freo[i] * as3n * den[i]
+for i in range(2, num_points + 1):
+    x_squared = x[i] * x[i]
+    radius += x_squared * imag[i] * imag[i]
+    kinetic_energy += imag[i] * d2r[i]
+    potential_harmonic += x_squared * imag[i] * imag[i]
+    potential_self += x_squared * (imag[i] / x[i]) ** 4
+    chemical_potential += mu[i] * imag[i] * imag[i]
+    density[i] = (imag[i] / x[i]) ** 2
+    density_norm += density[i] * x_squared
+    average_x += imag[i] * imag[i] * a_s3n * density[i]
 
-radious2 = radious * step
-radious = math.sqrt(radious * step)
-xaver = xaver * step
-chem = chem * step
-xkin = -xkin * step * 0.5
-poth0 = 0.5 * poth0 * step
-potself = potself * step * cequ * 0.5
-pot = potself + poth0
-xnormden = xnormden * step
+radius_squared = radius * step_size
+radius = math.sqrt(radius * step_size)
+average_x = average_x * step_size
+chemical_potential = chemical_potential * step_size
+kinetic_energy = -kinetic_energy * step_size * 0.5
+potential_harmonic = 0.5 * potential_harmonic * step_size
+potential_self = potential_self * step_size * cequ * 0.5
+potential_total = potential_self + potential_harmonic
+density_norm = density_norm * step_size
 
-print('xnormden =', xnormden)
-print('ene0 =', ene0)
-print('chemical =', chem)
-print('kinetic energy =', xkin)
-print('potential energy =', pot)
-print('potho =', poth0)
-print('potself =', potself)
-print('radius =', radious)
-print('radius2 =', radious2)
+print('Density normalization:', density_norm)
+print('Ene0:', ene0)
+print('Chemical potential:', chemical_potential)
+print('Kinetic energy:', kinetic_energy)
+print('Potential energy:', potential_total)
+print('Potential harmonic:', potential_harmonic)
+print('Potential self:', potential_self)
+print('Radius:', radius)
+print('Radius squared:', radius_squared)
 
 with open('density.txt', 'w') as f:
-    for i in range(2, n1 + 1):
-        f.write(f"{xr[i]:15.5e} {den[i]:15.5e}\n")
+    for i in range(2, num_points + 1):
+        f.write(f"{x[i]:15.5e} {density[i]:15.5e}\n")
