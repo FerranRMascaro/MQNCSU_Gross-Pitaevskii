@@ -1,32 +1,31 @@
-import math
+import numpy as np
 
 # Constants
 num_points = 1000
-x = [0.0] * (num_points + 1)
-real = [0.0] * (num_points + 1)
-imag = [0.0] * (num_points + 1)
-d2r = [0.0] * (num_points + 1)
-mu = [0.0] * (num_points + 1)
-new_real = [0.0] * (num_points + 1)
-density = [0.0] * (num_points + 1)
-potential = [0.0] * (num_points + 1)
+x = np.zeros(num_points + 1)
+real = np.zeros(num_points + 1)
+imag = np.zeros(num_points + 1)
+d2r = np.zeros(num_points + 1)
+mu = np.zeros(num_points + 1)
+new_real = np.zeros(num_points + 1)
+density = np.zeros(num_points + 1)
+potential = np.zeros(num_points + 1)
 
 # Input values
 a0, num_points, step_size, aa, time_step, alpha, iterations = map(float, input("Enter input values: ").split())
 
 # Constants
-pi = math.pi
+pi = np.pi
 pi_inv = 1.0 / (4.0 * pi)
-sqrt_pi_inv = math.sqrt(pi_inv)
+sqrt_pi_inv = np.sqrt(pi_inv)
 alpha_squared = alpha * alpha
-c = 2.0 * math.sqrt(alpha) ** 3 / math.sqrt(math.sqrt(pi))
+c = 2.0 * np.sqrt(alpha) ** 3 / np.sqrt(np.sqrt(pi))
 
 # Building the starting wave function R(r). Phi(r) = R(r)/r * Y00
-for i in range(1, num_points + 1):
-    x[i] = step_size * (i - 1)
-    x_squared = x[i] * x[i]
-    real[i] = c * x[i] * math.exp(-0.5 * alpha_squared * x_squared)
-    imag[i] = real[i]
+x = step_size * np.arange(num_points + 1)
+x_squared = x * x
+real = c * x * np.exp(-0.5 * alpha_squared * x_squared)
+imag = real.copy()
 
 # Starting the convergence process
 # To reduce to the harmonic oscillator, set cequ=0
@@ -42,10 +41,8 @@ for it in range(1, iterations + 1):
     ene0 = 0.0
 
     # Calculation of the second derivative using finite difference method
-    for i in range(2, num_points):
-        d2r[i] = (imag[i-1] + imag[i+1] - 2.0 * imag[i]) / (step_size * step_size)
-
-    d2r[num_points] = (imag[num_points-1] - 2.0 * imag[num_points]) / (step_size * step_size)
+    d2r[1:-1] = (imag[:-2] + imag[2:] - 2.0 * imag[1:-1]) / (step_size * step_size)
+    d2r[-1] = (imag[-2] - 2.0 * imag[-1]) / (step_size * step_size)
 
     for i in range(1, num_points + 1):
         x_squared = x[i] * x[i]
@@ -60,15 +57,14 @@ for it in range(1, iterations + 1):
         new_real[i] = imag[i] - time_step * mu[i] * imag[i]
         xnorm += new_real[i] * new_real[i]
 
-    xnorm = math.sqrt(xnorm * step_size)
+    xnorm = np.sqrt(xnorm * step_size)
     ene0 = ene0 * step_size
 
     if itw == 200:
         print('ene0')
 
 # Update the wave function normalization
-for i in range(1, num_points + 1):
-    imag[i] = new_real[i] / xnorm
+imag[1:] = new_real[1:] / xnorm
 
 if it == iterations:
     with open('output.txt', 'w') as f:
@@ -96,7 +92,7 @@ for i in range(2, num_points + 1):
     average_x += imag[i] * imag[i] * a_s3n * density[i]
 
 radius_squared = radius * step_size
-radius = math.sqrt(radius * step_size)
+radius = np.sqrt(radius * step_size)
 average_x = average_x * step_size
 chemical_potential = chemical_potential * step_size
 kinetic_energy = -kinetic_energy * step_size * 0.5
