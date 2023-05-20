@@ -74,6 +74,33 @@ if __name__ == '__main__':
                 
         log.close()
         
-    # calculation ofthe radious, potential and kinetic energy, density and single particle potential
-    for i in range(1, N_steps - 1):
-        fred[i] = freo[i-1] + freo[i + 1]
+        # calculation ofthe radious, potential and kinetic energy, density and single particle potential
+        for i in range(1, N_steps - 1):
+            fred[i] = (freo[i-1] + freo[i + 1]-2*fro[i])/(step**2)
+        fred[N_steps - 1] = (freo[N_steps-2]-2*freo[i])/(step**2)
+
+        radious, xkin, potho, potself, chem, xaver, xnormden = 0, 0, 0, 0, 0, 0, 0
+        
+        for i in range(1, N_steps):
+            xr2 = xr[i]**2
+            radious = radious + xr2*freo[i]**2
+            xkin = xkin + freo[i]*fred[i]
+            poth0 = potho + xr2*freo[i]**2
+            potself = potself + xr2*freo[i]**2
+            potself = potself + xr2*(freo[i]/xr[i])**4
+            chem = chem + xmu[i]*freo[i]**2
+            u[i] = 0.5*xr2 + cequ*(freo[i]/xr[i])**2
+            den[i] = (freo[i]/xr[i])**2
+            xnormden = xnormden + den[i]*xr2
+            xaver = xaver + (freo[i]**2)*as3n*den[i]
+        radious2 = radious*step
+        radious = m.sqrt(radious*step)
+        xaver = xaver*step
+        chem = chem*step
+        xkin = xkin*step/2
+        poth0 = poth0*step/2
+        potself = potself*step*cequ/2
+        pot = potself + poth0
+        xnormden = xnormden*step
+        
+        
