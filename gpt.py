@@ -1,7 +1,11 @@
 import numpy as np
+pi = np.pi
+
+# Input values
+a0, num_points, step_size, aa, time_step, alpha, iterations = map(float, input("Enter input values: ").split())
+iterations = int(iterations)
 
 # Constants
-num_points = 1000
 x = np.zeros(num_points + 1)
 real = np.zeros(num_points + 1)
 imag = np.zeros(num_points + 1)
@@ -11,20 +15,15 @@ new_real = np.zeros(num_points + 1)
 density = np.zeros(num_points + 1)
 potential = np.zeros(num_points + 1)
 
-# Input values
-a0, num_points, step_size, aa, time_step, alpha, iterations = map(float, input("Enter input values: ").split())
-
-# Constants
-pi = np.pi
 pi_inv = 1.0 / (4.0 * pi)
 sqrt_pi_inv = np.sqrt(pi_inv)
-alpha_squared = alpha * alpha
+alpha_sqrd = alpha * alpha
 c = 2.0 * np.sqrt(alpha) ** 3 / np.sqrt(np.sqrt(pi))
 
 # Building the starting wave function R(r). Phi(r) = R(r)/r * Y00
-x = step_size * np.arange(num_points + 1)
-x_squared = x * x
-real = c * x * np.exp(-0.5 * alpha_squared * x_squared)
+x = np.arange(0, (num_points + 1) * step_size, step_size)
+x_sqrd = x **2
+real = x * c * np.exp(-0.5 * alpha_sqrd * x_sqrd)
 imag = real.copy()
 
 # Starting the convergence process
@@ -45,13 +44,13 @@ for it in range(1, iterations + 1):
     d2r[-1] = (imag[-2] - 2.0 * imag[-1]) / (step_size * step_size)
 
     for i in range(1, num_points + 1):
-        x_squared = x[i] * x[i]
+        x_sqrd = x[i] * x[i]
         if i == 1:
             mu[i] = 0.0
         else:
             # Calculation of energies and xmu
-            ene0 = ene0 - imag[i] * d2r[i] * 0.5 + 0.5 * x_squared * imag[i] * imag[i] + 0.5 * cequ * x_squared * (imag[i] / x[i]) ** 4
-            mu[i] = -0.5 * d2r[i] / imag[i] + 0.5 * x_squared + cequ * (imag[i] / x[i]) ** 2
+            ene0 = ene0 - imag[i] * d2r[i] * 0.5 + 0.5 * x_sqrd * imag[i] * imag[i] + 0.5 * cequ * x_sqrd * (imag[i] / x[i]) ** 4
+            mu[i] = -0.5 * d2r[i] / imag[i] + 0.5 * x_sqrd + cequ * (imag[i] / x[i]) ** 2
 
         # Update the wave function
         new_real[i] = imag[i] - time_step * mu[i] * imag[i]
@@ -81,17 +80,17 @@ average_x = 0.0
 density_norm = 0.0
 
 for i in range(2, num_points + 1):
-    x_squared = x[i] * x[i]
-    radius += x_squared * imag[i] * imag[i]
+    x_sqrd = x[i] * x[i]
+    radius += x_sqrd * imag[i] * imag[i]
     kinetic_energy += imag[i] * d2r[i]
-    potential_harmonic += x_squared * imag[i] * imag[i]
-    potential_self += x_squared * (imag[i] / x[i]) ** 4
+    potential_harmonic += x_sqrd * imag[i] * imag[i]
+    potential_self += x_sqrd * (imag[i] / x[i]) ** 4
     chemical_potential += mu[i] * imag[i] * imag[i]
     density[i] = (imag[i] / x[i]) ** 2
-    density_norm += density[i] * x_squared
+    density_norm += density[i] * x_sqrd
     average_x += imag[i] * imag[i] * a_s3n * density[i]
 
-radius_squared = radius * step_size
+radius_sqrd = radius * step_size
 radius = np.sqrt(radius * step_size)
 average_x = average_x * step_size
 chemical_potential = chemical_potential * step_size
@@ -109,7 +108,7 @@ print('Potential energy:', potential_total)
 print('Potential harmonic:', potential_harmonic)
 print('Potential self:', potential_self)
 print('Radius:', radius)
-print('Radius squared:', radius_squared)
+print('Radius squared:', radius_sqrd)
 
 with open('density.txt', 'w') as f:
     for i in range(2, num_points + 1):
