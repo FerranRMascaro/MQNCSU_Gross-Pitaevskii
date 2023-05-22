@@ -5,8 +5,8 @@ import pandas as pd
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog = 'Iris_Ortega-Ferran_Rodriguez.py', description = 'Computes')
-    parser.add_argument('inpath', help = 'path')
-    parser.add_argument('-ao', '--armonic_osci', action='store_true' , help='to reduce to the armonic oscillator (cequ=0)')
+    parser.add_argument('inpath', help = 'Path where the input file is stored')
+    parser.add_argument('-ao', '--armonic_osci', action='store_true' , help='To reduce solution to the armonic oscillator (cequ=0)')
 
     arguments = parser.parse_args()
     inpath = arguments.inpath
@@ -16,21 +16,28 @@ if __name__ == '__main__':
     alpha2_arr = np.array(indata['alpha'])**2
     cvar_arr = 2.0*np.sqrt(indata['alpha'])**3/m.sqrt(m.sqrt(m.pi))
 
+    pd_res = pd.DataFrame(columns=['N', 'xnormden','ene', 'avg_chem_pot', 'kin_ene', 'total_pot', 'poth0', 'potint', 'radious', 'radious2'], index = [i for i in range(len(alpha2_arr))])
+
     #  num_run = number of runs or lines in input file
     #  building the starting wave function R(r). Phi(r)=R(r)/r*Y00
+    
+    log_path = '\\'.join(inpath.split('\\')[0:-1])
     for num_run in range(len(indata['N'])):
-
         xr, frev, freo, fred, xmu, fren, den, u = np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000)
         # N_steps=n1, N=aa
         [a0, N_steps, step, N, alpha, time, iter] = indata.iloc[num_run]
         alpha2 = alpha2_arr[num_run]
         cvar = cvar_arr[num_run]
+        print('')
+        print('---------------------------------------------------------')
+        print('Computing for', int(N), 'number of particles.')
+        N_steps = int(N_steps)
 
         # Log where we will write the output
-        log_path = '\\'.join(inpath.split('\\')[0:-1])
-        log = open(log_path + str(N)  '.txt', 'w+')
+        log_mu = open(log_path + str(N) + '_mu.txt', 'w+')
+        log_den = open(log_path + str(N) + '_den.txt', 'w+')
         
-        for i in range(int(N_steps)):
+        for i in range(N_steps):
             xr[i] = step*i
             xr2 = xr[i]**2
             frev[i] = cvar*xr[i]*m.e**(-0.5*alpha2*xr2)
@@ -69,14 +76,14 @@ if __name__ == '__main__':
             # I define the new wf.
             for i in range(N_steps):
                 freo[i] = fren[i]/xnorm
-            if it == iter:
-              	log.write(xr[i], xmu[i], 'i=2', N_steps)
-                
-        log.close()
-        
+            if it == iter - 1:
+                for i in range(2, N_steps):
+              	    log_mu.write(str(xr[i]) + '\t' + str(xmu[i]))
+            log_mu.close()
+
         # calculation ofthe radious, potential and kinetic energy, density and single particle potential
         for i in range(1, N_steps - 1):
-            fred[i] = (freo[i-1] + freo[i + 1]-2*fro[i])/(step**2)
+            fred[i] = (freo[i-1] + freo[i + 1]-2*freo[i])/(step**2)
         fred[N_steps - 1] = (freo[N_steps-2]-2*freo[i])/(step**2)
 
         radious, xkin, potho, potself, chem, xaver, xnormden = 0, 0, 0, 0, 0, 0, 0
@@ -102,5 +109,10 @@ if __name__ == '__main__':
         potself = potself*step*cequ/2
         pot = potself + poth0
         xnormden = xnormden*step
+        for i in range(2, N_steps):
+            log_den.write(str(xr[i]) + '\t' + str(den[i]))
+        log_den.close()
         
+        pd_res.loc[num_run] = [N_steps, xnormden, ene0, chem, xkin, pot, poth0, potself, radious, radious2]
         
+    pd_res.to_csv(log_path + 'results_csv', header = False, index = False)
