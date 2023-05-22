@@ -79,10 +79,9 @@ if __name__ == '__main__':
             # I define the new wf.
             for i in range(N_steps):
                 freo[i] = fren[i]/xnorm
-            if it == iter - 1:
-                for i in range(2, N_steps):
-              	    log_mu.write(str(xr[i]) + '\t' + str(xmu[i]))
-            log_mu.close()
+        for i in range(1, N_steps):
+            log_mu.write(str(xr[i]) + '\t' + str(xmu[i]) + '\n')
+        log_mu.close()
 
         # calculation ofthe radious, potential and kinetic energy, density and single particle potential
         for i in range(1, N_steps - 1):
@@ -112,8 +111,8 @@ if __name__ == '__main__':
         potself = potself*step*cequ/2
         pot = potself + poth0
         xnormden = xnormden*step
-        for i in range(2, N_steps):
-            log_den.write(str(xr[i]) + '\t' + str(den[i]))
+        for i in range(1, N_steps):
+            log_den.write(str(xr[i]) + '\t' + str(den[i]) + '\n')
         log_den.close()
         
         pd_res.loc[num_run] = [N_steps, xnormden, ene0, chem, xkin, pot, poth0, potself, radious, radious2]
