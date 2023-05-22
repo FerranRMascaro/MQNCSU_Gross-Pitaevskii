@@ -24,6 +24,7 @@ if __name__ == '__main__':
     log_path = '\\'.join(inpath.split('\\')[0:-1]) + '\\'
     if arguments.armonic_osci:
         log_path = log_path + 'ao_'
+        cequ = 0
 
     for num_run in range(len(indata['N'])):
         xr, frev, freo, fred, xmu, fren, den, u = np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000)
@@ -34,7 +35,7 @@ if __name__ == '__main__':
         print('')
         print('---------------------------------------------------------')
         print('Computing for', int(N), 'number of particles.')
-        N_steps = int(N_steps)
+        N_steps, N = int(N_steps), int(N)        
 
         # Log where we will write the output
         log_mu = open(log_path + str(N) + '_mu.txt', 'w+')
@@ -52,10 +53,7 @@ if __name__ == '__main__':
     # ************************************
         if not arguments.armonic_osci:
             cequ = a0*N
-        else:
-            cequ = 0
         as3n = N*a0**3
-        # cequ = 0
         itw = 0
         for it in range(int(iter)):
             itw = itw + 1
