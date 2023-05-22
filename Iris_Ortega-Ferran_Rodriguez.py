@@ -20,8 +20,11 @@ if __name__ == '__main__':
 
     #  num_run = number of runs or lines in input file
     #  building the starting wave function R(r). Phi(r)=R(r)/r*Y00
-    
-    log_path = '\\'.join(inpath.split('\\')[0:-1])
+
+    log_path = '\\'.join(inpath.split('\\')[0:-1]) + '\\'
+    if arguments.armonic_osci:
+        log_path = log_path + 'ao_'
+
     for num_run in range(len(indata['N'])):
         xr, frev, freo, fred, xmu, fren, den, u = np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000)
         # N_steps=n1, N=aa
