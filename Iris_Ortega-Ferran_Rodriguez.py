@@ -4,7 +4,7 @@ import argparse
 import pandas as pd
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog = 'Iris_Ortega-Ferran_Rodriguez.py', description = 'Computes')
+    parser = argparse.ArgumentParser(prog = 'Iris_Ortega-Ferran_Rodriguez.py', description = 'Solves the Gross-Pitaevskii equation given some parameters for bosons in a spherical trap.')
     parser.add_argument('inpath', help = 'Path where the input file is stored')
     parser.add_argument('-ao', '--armonic_osci', action='store_true' , help='To reduce solution to the armonic oscillator (cequ=0)')
 
@@ -30,12 +30,13 @@ if __name__ == '__main__':
         xr, frev, freo, fred, xmu, fren, den, u = np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000)
         # N_steps=n1, N=aa
         [a0, N_steps, step, N, alpha, time, iter] = indata.iloc[num_run]
+    
         alpha2 = alpha2_arr[num_run]
         cvar = cvar_arr[num_run]
         print('')
         print('---------------------------------------------------------')
         print('Computing for', int(N), 'number of particles.')
-        N_steps, N = int(N_steps), int(N)        
+        N_steps, N = int(N_steps), int(N)
 
         # Log where we will write the output
         log_mu = open(log_path + str(N) + '_mu.txt', 'w+')
@@ -60,15 +61,15 @@ if __name__ == '__main__':
             xnorm = 0
             ene0 = 0
             for i in range(1, N_steps - 1):
-                fred[i] = (freo[i-1]+freo[i+1]-2.0*freo[i])/(step*step)
-            fred[N_steps - 1]=(freo[N_steps-2]-2.0*freo[i])/(step**2)
-            xmu[0]=0.0
+                fred[i] = (freo[i-1]+freo[i+1]-2.0*freo[i])/(step**2)
+            fred[N_steps - 1] = (freo[N_steps-2]-2.0*freo[N_steps-1])/(step**2)
+            xmu[0] = 0.0
             for i in range(N_steps):
                 xr2=xr[i]**2
                 if i != 0:
-                    ene0 = 0.5*(ene0-freo[i]*fred[i] + xr2*freo[i]**2 + cequ*xr2*(freo[i]/xr[i])**4)
+                    ene0 = ene0 + 0.5*(-freo[i]*fred[i] + xr2*freo[i]**2 + cequ*xr2*(freo[i]/xr[i])**4)
                     xmu[i] = 0.5*(xr2-fred[i]/freo[i]) + cequ*(freo[i]/xr[i])**2
-                fren[i] = freo[i]-time*xmu[i]*freo[i]
+                fren[i] = freo[i] - time*xmu[i]*freo[i]
                 xnorm += fren[i]**2
             xnorm = m.sqrt(xnorm*step)
             ene0 = ene0*step
