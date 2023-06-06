@@ -46,7 +46,6 @@ if __name__ == '__main__':
             xr2 = xr[i]**2
             frev[i] = cvar*xr[i]*m.e**(-0.5*alpha2*xr2)
             freo[i] = frev[i]
-    # fins aquí, cvar, alpha, alpha2, xr, frev i freo estan iguals q al prog. OG
     
     # starting the convergence process
     # ****************************************
@@ -115,5 +114,5 @@ if __name__ == '__main__':
         log_den.close()
         
         pd_res.loc[num_run] = [N_steps, xnormden, ene0, chem, xkin, pot, poth0, potself, radious, radious2]
-        # xkin amb signe op (- enlloc de +), poth i poth0 malament, ordes de diferència
-    pd_res.to_csv(log_path + 'results_csv', header = False, index = False)
+
+    pd_res.to_csv(log_path + 'results.csv', header = False, index = False)
