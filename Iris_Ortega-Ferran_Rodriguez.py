@@ -93,7 +93,6 @@ if __name__ == '__main__':
             radious = radious + xr2*freo[i]**2
             xkin = xkin + freo[i]*fred[i]
             poth0 = poth0 + xr2*freo[i]**2
-            potself = potself + xr2*freo[i]**2
             potself = potself + xr2*(freo[i]/xr[i])**4
             chem = chem + xmu[i]*freo[i]**2
             u[i] = 0.5*xr2 + cequ*(freo[i]/xr[i])**2
@@ -113,6 +112,6 @@ if __name__ == '__main__':
             log_den.write(str(xr[i]) + '\t' + str(den[i]) + '\n')
         log_den.close()
         
-        pd_res.loc[num_run] = [N_steps, xnormden, ene0, chem, xkin, pot, poth0, potself, radious, radious2]
+        pd_res.loc[num_run] = [N, xnormden, ene0, chem, xkin, pot, poth0, potself, radious, radious2]
 
-    pd_res.to_csv(log_path + 'results.csv', header = False, index = False)
+    pd_res.to_csv(log_path + 'results.csv', header = True, index = False)
