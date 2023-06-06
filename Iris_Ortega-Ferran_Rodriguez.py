@@ -12,10 +12,9 @@ if __name__ == '__main__':
     inpath = arguments.inpath
     
     # Extracting data
-    indata = pd.read_csv(inpath, sep = ' ', names=['a0','N_steps','step','N','alpha','time','iter'], header=None)
+    indata = pd.read_csv(inpath, sep = ' ', names=['a0','N_steps','step','N','time', 'alpha', 'iter'], header=None)
     alpha2_arr = np.array(indata['alpha'])**2
     cvar_arr = 2.0*np.sqrt(indata['alpha'])**3/m.sqrt(m.sqrt(m.pi))
-
     pd_res = pd.DataFrame(columns=['N', 'xnormden','ene', 'avg_chem_pot', 'kin_ene', 'total_pot', 'poth0', 'potint', 'radious', 'radious2'], index = [i for i in range(len(alpha2_arr))])
 
     #  num_run = number of runs or lines in input file
@@ -29,8 +28,8 @@ if __name__ == '__main__':
     for num_run in range(len(indata['N'])):
         xr, frev, freo, fred, xmu, fren, den, u = np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000)
         # N_steps=n1, N=aa
-        [a0, N_steps, step, N, alpha, time, iter] = indata.iloc[num_run]
-    
+        [a0, N_steps, step, N, time, alpha, iter] = indata.iloc[num_run]
+        print(N, N_steps, step, a0, alpha, time, iter)
         alpha2 = alpha2_arr[num_run]
         cvar = cvar_arr[num_run]
         print('')
@@ -47,7 +46,8 @@ if __name__ == '__main__':
             xr2 = xr[i]**2
             frev[i] = cvar*xr[i]*m.e**(-0.5*alpha2*xr2)
             freo[i] = frev[i]
-
+    # fins aquí, cvar, alpha, alpha2, xr, frev i freo estan iguals q al prog. OG
+    
     # starting the convergence process
     # ****************************************
     # to reduce to the armonic oscillator cequ=0
@@ -87,13 +87,13 @@ if __name__ == '__main__':
             fred[i] = (freo[i-1] + freo[i + 1]-2*freo[i])/(step**2)
         fred[N_steps - 1] = (freo[N_steps-2]-2*freo[i])/(step**2)
 
-        radious, xkin, potho, potself, chem, xaver, xnormden = 0, 0, 0, 0, 0, 0, 0
+        radious, xkin, poth0, potself, chem, xaver, xnormden = 0, 0, 0, 0, 0, 0, 0
         
         for i in range(1, N_steps):
             xr2 = xr[i]**2
             radious = radious + xr2*freo[i]**2
             xkin = xkin + freo[i]*fred[i]
-            poth0 = potho + xr2*freo[i]**2
+            poth0 = poth0 + xr2*freo[i]**2
             potself = potself + xr2*freo[i]**2
             potself = potself + xr2*(freo[i]/xr[i])**4
             chem = chem + xmu[i]*freo[i]**2
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         radious = m.sqrt(radious*step)
         xaver = xaver*step
         chem = chem*step
-        xkin = xkin*step/2
+        xkin = -xkin*step/2
         poth0 = poth0*step/2
         potself = potself*step*cequ/2
         pot = potself + poth0
@@ -115,5 +115,5 @@ if __name__ == '__main__':
         log_den.close()
         
         pd_res.loc[num_run] = [N_steps, xnormden, ene0, chem, xkin, pot, poth0, potself, radious, radious2]
-        
+        # xkin amb signe op (- enlloc de +), poth i poth0 malament, ordes de diferència
     pd_res.to_csv(log_path + 'results_csv', header = False, index = False)
