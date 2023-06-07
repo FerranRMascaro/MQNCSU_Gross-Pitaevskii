@@ -7,6 +7,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog = 'Iris_Ortega-Ferran_Rodriguez.py', description = 'Solves the Gross-Pitaevskii equation given some parameters for bosons in a spherical trap.')
     parser.add_argument('inpath', help = 'Path where the input file is stored')
     parser.add_argument('-ao', '--armonic_osci', action='store_true' , help='To reduce solution to the armonic oscillator (cequ=0)')
+    parser.add_argument('-tf', '--thomas_fermi', action='store_true' , help='To apply the Thomas-Fermi approximation')
 
     arguments = parser.parse_args()
     inpath = arguments.inpath
@@ -24,16 +25,19 @@ if __name__ == '__main__':
     if arguments.armonic_osci:
         log_path = log_path + 'ao_'
         cequ = 0
+    if arguments.thomas_fermi:
+        log_path = log_path + 'tf_'
 
     for num_run in range(len(indata['N'])):
         xr, frev, freo, fred, xmu, fren, den, u = np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000)
         # N_steps=n1, N=aa
         [a0, N_steps, step, N, time, alpha, iter] = indata.iloc[num_run]
+        print('---------------------------------------------------------')
+        print('')
         print(N, N_steps, step, a0, alpha, time, iter)
         alpha2 = alpha2_arr[num_run]
         cvar = cvar_arr[num_run]
         print('')
-        print('---------------------------------------------------------')
         print('Computing for', int(N), 'number of particles.')
         N_steps, N = int(N_steps), int(N)
 
