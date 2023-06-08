@@ -6,7 +6,7 @@ import pandas as pd
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog = 'Iris_Ortega-Ferran_Rodriguez.py', description = 'Solves the Gross-Pitaevskii equation given some parameters for bosons in a spherical trap.')
     parser.add_argument('inpath', help = 'Path where the input file is stored')
-    parser.add_argument('-ao', '--armonic_osci', action='store_true' , help='To reduce solution to the armonic oscillator (cequ=0)')
+    parser.add_argument('-ao', '--armonic_osci', action='store_true' , help ='To reduce solution to the armonic oscillator (cequ=0)')
     parser.add_argument('-tf', '--thomas_fermi', action='store_true' , help='To apply the Thomas-Fermi approximation')
 
     arguments = parser.parse_args()
@@ -18,16 +18,19 @@ if __name__ == '__main__':
     cvar_arr = 2.0*np.sqrt(indata['alpha'])**3/m.sqrt(m.sqrt(m.pi))
     pd_res = pd.DataFrame(columns=['N', 'xnormden','ene', 'avg_chem_pot', 'kin_ene', 'total_pot', 'poth0', 'potint', 'radious', 'radious2'], index = [i for i in range(len(alpha2_arr))])
 
-    #  num_run = number of runs or lines in input file
     #  building the starting wave function R(r). Phi(r)=R(r)/r*Y00
 
     log_path = '\\'.join(inpath.split('\\')[0:-1]) + '\\'
+    
+    tf = 1
     if arguments.armonic_osci:
         log_path = log_path + 'ao_'
         cequ = 0
     if arguments.thomas_fermi:
         log_path = log_path + 'tf_'
-
+        ctf = 10**(-100)  
+        
+    #  num_run = number of runs or lines in input file
     for num_run in range(len(indata['N'])):
         xr, frev, freo, fred, xmu, fren, den, u = np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000), np.zeros(1000)
         # N_steps=n1, N=aa
@@ -57,6 +60,7 @@ if __name__ == '__main__':
     # ************************************
         if not arguments.armonic_osci:
             cequ = a0*N
+
         as3n = N*a0**3
         itw = 0
         for it in range(int(iter)):
@@ -70,8 +74,8 @@ if __name__ == '__main__':
             for i in range(N_steps):
                 xr2=xr[i]**2
                 if i != 0:
-                    ene0 = ene0 + 0.5*(-freo[i]*fred[i] + xr2*freo[i]**2 + cequ*xr2*(freo[i]/xr[i])**4)
-                    xmu[i] = 0.5*(xr2-fred[i]/freo[i]) + cequ*(freo[i]/xr[i])**2
+                    ene0 = ene0 + 0.5*(-ctf*freo[i]*fred[i] + xr2*freo[i]**2 + cequ*xr2*(freo[i]/xr[i])**4)
+                    xmu[i] = 0.5*(xr2-ctf*fred[i]/freo[i]) + cequ*(freo[i]/xr[i])**2
                 fren[i] = freo[i] - time*xmu[i]*freo[i]
                 xnorm += fren[i]**2
             xnorm = m.sqrt(xnorm*step)
