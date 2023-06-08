@@ -11,5 +11,5 @@ set key top right
 
 set output "c.png"
 
-plot "1000.9" u 1:2 t"N=1000" w lp pt 7, \
-     "100000.9" u 1:2 t"N=100000" w lp pt 7
+plot "1000.9" u 1:2 t"N=1000" w lp pt 7 ps 0.5, \
+     "100000.9" u 1:2 t"N=100000" w lp pt 7 ps 0.5
