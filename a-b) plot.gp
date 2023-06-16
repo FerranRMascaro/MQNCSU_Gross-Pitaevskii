@@ -37,7 +37,7 @@ plot input u 1:4 t"μ" w lp pt 7, \
     # input u 1:10 t"r2" w lp pt 7
 
 
-input = "b_resultsresults.csv"
+input = "b.csv"
 set output "b.png"
 
 set yrange [0.1:50]
@@ -45,8 +45,8 @@ set yrange [0.1:50]
 plot input u 1:4 t"μ" w lp pt 7, \
     input u 1:6 t"μ_T" w lp pt 7, \
     input u 1:3 t"E_T" w lp pt 7, \
-    input u 1:5 t"E_{cin.}" w lp pt 7, \
     input u 1:7 t"E_{harm.}" w lp pt 7, \
     input u 1:8 t"μ_{int.}" w lp pt 7
+    # input u 1:5 t"E_{cin.}" w lp pt 7, \
     # input u 1:9 t"r" w lp pt 7, \
     # input u 1:10 t"r2" w lp pt 7
